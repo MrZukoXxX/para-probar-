@@ -7,7 +7,7 @@ Aplicación Flask con CRUD de productos, PostgreSQL y despliegue automatizado en
 - CRUD completo de productos
 - PostgreSQL como base de datos
 - PgAdmin disponible en `pgangeltroy.byronrm.com`
-- App pública en `angelove.duckdns.org`
+- App pública en `angelo.byronrm.com`
 - Despliegue automático por GitHub Actions
 - Stack de Docker compatible con Traefik y red `traefik-public`
 
@@ -28,7 +28,7 @@ Aplicación Flask con CRUD de productos, PostgreSQL y despliegue automatizado en
 1. Configura los secretos en el repositorio GitHub.
 2. Empuja cambios a la rama `main`.
 3. El workflow construye la imagen, la publica a GHCR y despliega el stack en el VPS.
-4. Accede a `angelove.duckdns.org` para la app y `pgangeltroy.byronrm.com` para pgAdmin.
+4. Accede a `angelo.byronrm.com` para la app y `pgangeltroy.byronrm.com` para pgAdmin.
 
 ## Notas
 
