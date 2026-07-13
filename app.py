@@ -5,6 +5,7 @@ from urllib.parse import quote_plus
 
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "please-change-this-secret")
@@ -24,14 +25,19 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 
-def wait_for_db(retries=10, delay=2):
+def wait_for_db(retries=60, delay=3):
+    last_error = None
     for attempt in range(retries):
         try:
-            db.session.execute("SELECT 1")
+            db.session.execute(text("SELECT 1"))
+            db.session.rollback()
             return
-        except Exception:
+        except Exception as exc:
+            last_error = exc
             time.sleep(delay)
-    raise RuntimeError("No fue posible conectar con la base de datos PostgreSQL")
+    raise RuntimeError(
+        "No fue posible conectar con la base de datos PostgreSQL"
+    ) from last_error
 
 
 class Product(db.Model):
