@@ -101,4 +101,4 @@ jobs:
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
             echo "==> Desplegando stack..."
-            docker stack deploy --with-registry-auth -c stack.yml borrar
+            docker stack deploy --with-registry-auth -c stack.yml angel_troy
