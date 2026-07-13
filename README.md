@@ -34,3 +34,4 @@ Aplicación Flask con CRUD de productos, PostgreSQL y despliegue automatizado en
 
 - El servicio `portainerat.byronrm.com` se gestiona desde Portainer si ya existe en tu VPS.
 - Cambia `FLASK_SECRET_KEY` y credenciales de PostgreSQL antes de producción.
+cacalo
