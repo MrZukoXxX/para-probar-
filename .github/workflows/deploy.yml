@@ -97,7 +97,7 @@ jobs:
             docker network inspect traefik-public >/dev/null 2>&1 || docker network create --driver overlay --attachable traefik-public
 
             echo "==> Descargando la imagen..."
-            docker pull ghcr.io/${{ github.repository }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
             echo "==> Desplegando stack..."
             docker stack deploy --with-registry-auth -c stack.yml borrar

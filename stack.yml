@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   app:
-    image: ghcr.io/mrzukoxxx/para-probar-:latest
+    image: ghcr.io/mrzukoxxx/para-probar:latest
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
