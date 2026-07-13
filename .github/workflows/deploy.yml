@@ -59,8 +59,9 @@ jobs:
           port: ${{ secrets.VPS_SSH_PORT }}
           script: |
             echo "probando conexion ssh..."
-            mkdir -p ~/landinga
-            touch ~/landinga/quintoa.txt
+            rm -rf ~/quintoa.txt
+            rm -rf ~/landinga
+            mkdir -p ~/devops
 
       # 6. Copiar archivos desde Git al VPS
       - name: Copiar archivos al VPS
@@ -71,7 +72,7 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_SSH_PORT }}
           source: "stack.yml,Makefile"
-          target: "/home/${{ secrets.VPS_USER }}/landinga"
+          target: "/home/${{ secrets.VPS_USER }}/devops"
 
       # 7. Desplegar servicios en el VPS
       - name: Despliegue de los servicios
@@ -83,8 +84,8 @@ jobs:
           port: ${{ secrets.VPS_SSH_PORT }}
           script: |
             echo "✅ Desplegando servicios"
-            mkdir -p /home/${{ secrets.VPS_USER }}/landinga
-            cd /home/${{ secrets.VPS_USER }}/landinga
+            mkdir -p /home/${{ secrets.VPS_USER }}/devops
+            cd /home/${{ secrets.VPS_USER }}/devops
 
             echo "==> Iniciando sesión en GHCR..."
             if [ -n "${{ secrets.GHCR_PAT }}" ]; then
