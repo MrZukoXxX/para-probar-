@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Construir y Publicar Imagen Docker
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: mrzukoxxx/para-probar
   IMAGE_TAG: latest
 
 jobs:
@@ -19,11 +19,11 @@ jobs:
 
     steps:
       # 1. Descargar el código del repositorio
-      - name: Checkout repository
+      - name: Descargar código
         uses: actions/checkout@v4
 
       # 2. Iniciar sesión en el registro de contenedores
-      - name: Log in to the Container registry
+      - name: Iniciar sesión en GHCR
         uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
 
       # 3. Generar etiquetas y metadata para Docker
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Generar etiquetas y metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -41,7 +41,7 @@ jobs:
             type=raw,value=latest
 
       # 4. Construir la imagen y subirla a GHCR
-      - name: Build and push Docker image
+      - name: Construir y subir la imagen Docker
         uses: docker/build-push-action@v7
         with:
           context: .
