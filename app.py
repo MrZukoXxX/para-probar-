@@ -28,10 +28,18 @@ def wait_for_db(retries=10, delay=2):
     for attempt in range(retries):
         try:
             db.session.execute("SELECT 1")
-            return
+            return True
         except Exception:
             time.sleep(delay)
-    raise RuntimeError("No fue posible conectar con la base de datos PostgreSQL")
+    return False
+
+
+def init_db():
+    if wait_for_db():
+        db.create_all()
+        app.logger.info("Base de datos PostgreSQL lista y tablas creadas")
+    else:
+        app.logger.error("No fue posible conectar con la base de datos PostgreSQL")
 
 
 class Product(db.Model):
@@ -58,8 +66,7 @@ class Product(db.Model):
 
 
 with app.app_context():
-    wait_for_db()
-    db.create_all()
+    init_db()
 
 
 @app.route("/")
