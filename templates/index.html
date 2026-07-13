@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angel & Troy | Gestión de Productos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #0f172a; color: #e2e8f0; }
+        .card { background: #111827; border: 1px solid #334155; }
+        .btn-brand { background: #2563eb; color: #fff; }
+        .btn-brand:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="display-6 fw-bold">Angel & Troy</h1>
+            <p class="text-muted">Aplicación CRUD de productos para tu landing y base de datos PostgreSQL.</p>
+        </div>
+        <div class="text-md-end">
+            <a href="/product/new" class="btn btn-brand">Agregar producto</a>
+            <a href="https://pgangeltroy.byronrm.com" target="_blank" class="btn btn-outline-light">Abrir pgAdmin</a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row gy-4">
+        <div class="col-lg-8">
+            <div class="card p-4 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h5">Productos registrados</h2>
+                        <p class="text-muted mb-0">Administra inventario, precios y stock.</p>
+                    </div>
+                    <span class="badge bg-info text-dark">{{ products|length }} productos</span>
+                </div>
+                {% if products %}
+                <div class="table-responsive">
+                    <table class="table table-borderless table-hover text-white align-middle">
+                        <thead>
+                            <tr class="text-muted small text-uppercase">
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category }}</td>
+                                <td>$ {{ '%.2f'|format(product.price) }}</td>
+                                <td>{{ product.stock }}</td>
+                                <td class="text-end">
+                                    <a href="/product/{{ product.id }}/edit" class="btn btn-sm btn-outline-info">Editar</a>
+                                    <form action="/product/{{ product.id }}/delete" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <p class="text-muted">No hay productos registrados. Empieza agregando uno.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card p-4 shadow-sm">
+                <h3 class="h6 mb-3">Detalles de la aplicación</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-transparent border-top-0 border-start-0 border-end-0 text-white-50">Dominio: angelo.byronrm.com</li>
+                    <li class="list-group-item bg-transparent border-0 text-white-50">Base de datos: PostgreSQL 16</li>
+                    <li class="list-group-item bg-transparent border-0 text-white-50">Admin DB: pgangeltroy.byronrm.com</li>
+                    <li class="list-group-item bg-transparent border-0 text-white-50">Portainer: portainerat.byronrm.com</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
