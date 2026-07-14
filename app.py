@@ -1,6 +1,7 @@
 import os
 import time
 from datetime import datetime
+from threading import Thread
 from urllib.parse import quote_plus
 
 from flask import Flask, flash, redirect, render_template, request, url_for
@@ -23,6 +24,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+
+DATABASE_READY = False
+DB_INIT_ERROR = None
 
 
 def wait_for_db(retries=60, delay=3):
@@ -63,19 +67,44 @@ class Product(db.Model):
         }
 
 
-with app.app_context():
-    wait_for_db()
-    db.create_all()
+def initialize_database():
+    global DATABASE_READY, DB_INIT_ERROR
+
+    DATABASE_READY = False
+    DB_INIT_ERROR = None
+
+    try:
+        with app.app_context():
+            wait_for_db(retries=30, delay=2)
+            db.create_all()
+        DATABASE_READY = True
+    except Exception as exc:
+        DATABASE_READY = False
+        DB_INIT_ERROR = str(exc)
+
+
+Thread(target=initialize_database, daemon=True).start()
 
 
 @app.route("/")
 def index():
-    products = Product.query.order_by(Product.id.desc()).all()
-    return render_template("index.html", products=products)
+    products = []
+    database_error = None
+
+    if DATABASE_READY:
+        products = Product.query.order_by(Product.id.desc()).all()
+    else:
+        database_error = DB_INIT_ERROR or "La base de datos aún no está disponible."
+
+    return render_template("index.html", products=products, database_error=database_error)
 
 
 @app.route("/product/new", methods=["GET", "POST"])
 def create_product():
+    if not DATABASE_READY:
+        flash("La base de datos aún no está lista. Inténtalo de nuevo en unos segundos.", "warning")
+        return redirect(url_for("index"))
+
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         category = request.form.get("category", "").strip()
@@ -109,6 +138,10 @@ def create_product():
 
 @app.route("/product/<int:product_id>/edit", methods=["GET", "POST"])
 def edit_product(product_id):
+    if not DATABASE_READY:
+        flash("La base de datos aún no está lista. Inténtalo de nuevo en unos segundos.", "warning")
+        return redirect(url_for("index"))
+
     product = Product.query.get_or_404(product_id)
 
     if request.method == "POST":
@@ -132,6 +165,10 @@ def edit_product(product_id):
 
 @app.route("/product/<int:product_id>/delete", methods=["POST"])
 def delete_product(product_id):
+    if not DATABASE_READY:
+        flash("La base de datos aún no está lista. Inténtalo de nuevo en unos segundos.", "warning")
+        return redirect(url_for("index"))
+
     product = Product.query.get_or_404(product_id)
 
     try:
@@ -147,13 +184,16 @@ def delete_product(product_id):
 
 @app.route("/api/products")
 def api_products():
+    if not DATABASE_READY:
+        return {"error": "database_unavailable", "message": DB_INIT_ERROR or "La base de datos aún no está disponible."}, 503
+
     products = Product.query.order_by(Product.id.desc()).all()
     return {"products": [product.to_dict() for product in products]}
 
 
 @app.route("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "database_ready": DATABASE_READY}
 
 
 if __name__ == "__main__":
