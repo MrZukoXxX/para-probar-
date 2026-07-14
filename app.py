@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "please-change-this-secret")
@@ -67,6 +67,36 @@ class Product(db.Model):
         }
 
 
+def ensure_schema():
+    with app.app_context():
+        inspector = inspect(db.engine)
+        if inspector.has_table("product"):
+            return
+
+        db.session.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS product (
+                    id INTEGER PRIMARY KEY,
+                    name VARCHAR(140) NOT NULL,
+                    category VARCHAR(80) NOT NULL,
+                    description TEXT,
+                    price NUMERIC(10, 2) NOT NULL,
+                    stock INTEGER NOT NULL,
+                    created_at TIMESTAMP WITHOUT TIME ZONE,
+                    updated_at TIMESTAMP WITHOUT TIME ZONE
+                )
+                """
+            )
+        )
+        db.session.commit()
+
+
+def next_product_id():
+    last_product = Product.query.order_by(Product.id.desc()).first()
+    return (last_product.id if last_product else 0) + 1
+
+
 def initialize_database():
     global DATABASE_READY, DB_INIT_ERROR
 
@@ -76,7 +106,7 @@ def initialize_database():
     try:
         with app.app_context():
             wait_for_db(retries=30, delay=2)
-            db.create_all()
+            ensure_schema()
         DATABASE_READY = True
     except Exception as exc:
         DATABASE_READY = False
@@ -118,6 +148,7 @@ def create_product():
 
         try:
             product = Product(
+                id=next_product_id(),
                 name=name,
                 category=category,
                 description=description,
